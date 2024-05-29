@@ -1,6 +1,8 @@
+// components/ProtectedRoute.tsx
 import React, { useEffect } from 'react';
-import { useRouter } from 'expo-router';
+import { View, ActivityIndicator } from 'react-native';
 import useAuth from '../hooks/useAuth';
+import { useRouter } from 'expo-router';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
@@ -8,12 +10,16 @@ const ProtectedRoute = ({ children }) => {
 
   useEffect(() => {
     if (!loading && !user) {
-      router.replace('/LoginScreen');
+      router.replace('/AuthScreen');
     }
-  }, [user, loading, router]);
+  }, [loading, user, router]);
 
   if (loading || !user) {
-    return null;
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+        <ActivityIndicator size="large" color="#0000ff" />
+      </View>
+    );
   }
 
   return children;

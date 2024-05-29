@@ -17,8 +17,9 @@ export const AuthProvider = ({ children }) => {
             headers: { 'auth-token': token }
           });
           setUser(response.data);
+          console.log('User loaded:', response.data);
         } catch (error) {
-          console.error(error);
+          console.error('Failed to load user', error);
         }
       }
       setLoading(false);
@@ -26,16 +27,16 @@ export const AuthProvider = ({ children }) => {
     loadUser();
   }, []);
 
-  const login = async (email, password) => {
+  const login = async (phoneNumber, otp) => {
     try {
-      const response = await axios.post('http://192.168.8.130:5000/api/user/login', { email, password });
+      const response = await axios.post('http://192.168.8.130:5000/api/user/verify-login-otp', { phoneNumber, otp });
       await AsyncStorage.setItem('auth-token', response.data.token);
       setUser(response.data.user);
+      console.log('Login successful:', response.data.user);
     } catch (error) {
       console.error('Login failed', error);
     }
   };
-  
 
   const logout = async () => {
     await AsyncStorage.removeItem('auth-token');

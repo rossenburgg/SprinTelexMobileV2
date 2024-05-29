@@ -1,31 +1,67 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
-import { useRouter } from 'expo-router';
+import { View, Text, TextInput, Button, StyleSheet, SafeAreaView } from 'react-native';
+import axios from 'axios';
+import { useNavigation } from '@react-navigation/native';
 import useAuth from '../hooks/useAuth';
 
 const LoginScreen = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
+  const navigation = useNavigation();
   const { login } = useAuth();
-  const router = useRouter();
 
-  const handleLogin = async () => {
+  const handleSendOtp = async () => {
     try {
-      await login(email, password);
-      router.replace('(tabs)');
+      console.log('Sending OTP to:', phoneNumber);
+      const response = await axios.post('http://192.168.8.130:5000/api/user/send-login-otp', { phoneNumber });
+      console.log(response.data);
+      setOtpSent(true);
     } catch (error) {
-      console.error(error);
+      console.error('Error sending OTP:', error);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      console.log('Verifying OTP for:', phoneNumber);
+      const response = await axios.post('http://192.168.8.130:5000/api/user/verify-login-otp', { phoneNumber, otp });
+      console.log('OTP verification response:', response.data);
+      await login(phoneNumber, otp);
+      navigation.navigate('(tabs)'); // Ensure the correct route is used
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Login</Text>
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-      <Button title="Login" onPress={handleLogin} />
-      <Button title="Go to Signup" onPress={() => router.push('SignupScreen')} />
-    </View>
+    <SafeAreaView style={styles.container}>
+      {!otpSent ? (
+        <>
+          <Text>Login</Text>
+          <TextInput
+            placeholder="Phone Number"
+            value={phoneNumber}
+            onChangeText={setPhoneNumber}
+            style={styles.input}
+            keyboardType="phone-pad"
+          />
+          <Button title="Send OTP" onPress={handleSendOtp} />
+        </>
+      ) : (
+        <>
+          <Text>Enter OTP</Text>
+          <TextInput
+            placeholder="OTP"
+            value={otp}
+            onChangeText={setOtp}
+            style={styles.input}
+            keyboardType="number-pad"
+          />
+          <Button title="Verify OTP" onPress={handleVerifyOtp} />
+        </>
+      )}
+    </SafeAreaView>
   );
 };
 

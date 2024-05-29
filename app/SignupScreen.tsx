@@ -1,39 +1,71 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, Button, StyleSheet } from 'react-native';
+import { View, Text, TextInput, Button, StyleSheet, SafeAreaView } from 'react-native';
 import axios from 'axios';
-import { useNavigation } from 'expo-router';
-import useAuth from '../hooks/useAuth';
+import { useNavigation } from '@react-navigation/native';
 
 const SignupScreen = () => {
-  const [username, setUsername] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const { login } = useAuth();
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const navigation = useNavigation();
 
-  const handleSignup = async () => {
+  const handleSendOtp = async () => {
     try {
-      await axios.post('http://192.168.8.130:5000/api/user/register', { username, email, password });
-      await login(email, password);
-      navigation.navigate('(tabs)');
+      await axios.post('http://192.168.8.130:5000/api/user/send-otp', { phoneNumber });
+      setOtpSent(true);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    try {
+      const response = await axios.post('http://192.168.8.130:5000/api/user/verify-otp', { phoneNumber, otp });
+      console.log(response.data);
+      navigation.navigate('LoginScreen');
     } catch (error) {
       console.error(error);
     }
   };
 
   return (
-    <View style={styles.container}>
-      <Text>Signup</Text>
-      <TextInput placeholder="Username" value={username} onChangeText={setUsername} style={styles.input} />
-      <TextInput placeholder="Email" value={email} onChangeText={setEmail} style={styles.input} />
-      <TextInput placeholder="Password" value={password} onChangeText={setPassword} secureTextEntry style={styles.input} />
-      <Button title="Signup" onPress={handleSignup} />
-      <Button title="Go to Login" onPress={() => navigation.navigate('LoginScreen')} />
-    </View>
+    <SafeAreaView style={styles.safeArea}>
+      <View style={styles.container}>
+        {!otpSent ? (
+          <>
+            <Text>Enter your phone number</Text>
+            <TextInput
+              placeholder="Phone Number"
+              value={phoneNumber}
+              onChangeText={setPhoneNumber}
+              style={styles.input}
+              keyboardType="phone-pad"
+            />
+            <Button title="Send OTP" onPress={handleSendOtp} />
+          </>
+        ) : (
+          <>
+            <Text>Enter the OTP sent to your phone</Text>
+            <TextInput
+              placeholder="OTP"
+              value={otp}
+              onChangeText={setOtp}
+              style={styles.input}
+              keyboardType="number-pad"
+            />
+            <Button title="Verify OTP" onPress={handleVerifyOtp} />
+          </>
+        )}
+      </View>
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#fff',
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

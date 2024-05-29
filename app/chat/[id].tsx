@@ -158,7 +158,7 @@ const ChatScreen = () => {
           </View>
         </View>
         <ImageBackground
-         source={require('../../../assets/images/defaultbackground.png')} // Add your default background image URL here
+         source={require('../../assets/images/defaultbackground.png')} // Add your default background image URL here
           style={styles.chatBackground}
         >
           <ScrollView style={styles.chatContainer} contentContainerStyle={{ paddingBottom: 80, paddingTop: 16 }}>

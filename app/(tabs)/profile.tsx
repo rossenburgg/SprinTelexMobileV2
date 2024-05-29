@@ -15,14 +15,16 @@ import {
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
 import Icon from 'react-native-vector-icons/Ionicons';
-import { useNavigation } from '@react-navigation/native'; // Import the hook
+import { useNavigation } from '@react-navigation/native';
+import useAuth from '../../hooks/useAuth';
 
 const { width, height } = Dimensions.get('window');
 
 const ProfileScreen = () => {
-  const navigation = useNavigation(); // Get the navigation object
+  const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
+  const { user, logout } = useAuth();
   const scrollY = useRef(new Animated.Value(0)).current;
 
   const profilePictureSize = scrollY.interpolate({
@@ -70,7 +72,7 @@ const ProfileScreen = () => {
         <Text style={styles.headerText}>Settings</Text>
         <TouchableOpacity
           style={styles.editButton}
-          onPress={() => navigation.navigate('EditProfile')} // Navigate to EditProfile screen
+          onPress={() => navigation.navigate('EditProfile')} // Correct navigation
         >
           <Text style={[styles.editButtonText, { color: colors.primary }]}>Edit</Text>
         </TouchableOpacity>
@@ -95,7 +97,7 @@ const ProfileScreen = () => {
       >
         <Animated.View style={[styles.profileInfo, { opacity: profileOpacity }]}>
           <Animated.Image
-            source={{ uri: 'https://picsum.photos/200' }}
+            source={{ uri: user?.profileImage || 'https://picsum.photos/200' }}
             style={[
               styles.avatar,
               {
@@ -106,35 +108,18 @@ const ProfileScreen = () => {
               },
             ]}
           />
-          <Text style={styles.name}>Rossen</Text>
-          <Text style={styles.phone}>+375 25 753 9362</Text>
-          <Text style={styles.username}>@rossenburgg</Text>
+          <Text style={styles.name}>{user?.username}</Text>
+          <Text style={styles.phone}>{user?.phoneNumber}</Text>
+          <Text style={styles.username}>{user?.bio}</Text>
           <TouchableOpacity>
             <Text style={styles.changePhotoText}>Change Photo</Text>
           </TouchableOpacity>
         </Animated.View>
         <View style={styles.menuCard}>
-          <View style={styles.accountContainer}>
-            <TouchableOpacity style={styles.accountItem}>
-              <Image source={{ uri: 'https://picsum.photos/200' }} style={styles.accountAvatar} />
-              <Text style={styles.accountText}>@Defc0n</Text>
-              <View style={styles.accountBadge}>
-                <Text style={styles.accountBadgeText}>11.7K</Text>
-              </View>
-            </TouchableOpacity>
-            <View style={styles.divider} />
-            <TouchableOpacity style={styles.accountItem}>
-              <Image source={{ uri: 'https://picsum.photos/200' }} style={styles.accountAvatar} />
-              <Text style={styles.accountText}>Dd</Text>
-              <View style={styles.accountBadge}>
-                <Text style={styles.accountBadgeText}>62</Text>
-              </View>
-            </TouchableOpacity>
-            <View style={styles.divider} />
-            <TouchableOpacity style={styles.addAccountButton}>
-              <Text style={styles.addAccountText}>Add Account</Text>
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity style={styles.menuItem} onPress={logout}>
+            <Icon name="log-out-outline" size={24} color={colors.primary} />
+            <Text style={styles.menuText}>Logout</Text>
+          </TouchableOpacity>
         </View>
         <View style={styles.menuCard}>
           <TouchableOpacity style={styles.menuItem}>

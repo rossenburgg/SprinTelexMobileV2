@@ -16,13 +16,19 @@ import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { Colors } from '@/constants/Colors';
+import axios from 'axios';
+import useAuth from '../hooks/useAuth';
 
 const EditProfileScreen = () => {
   const navigation = useNavigation();
   const colorScheme = useColorScheme();
   const colors = Colors[colorScheme ?? 'light'];
-  const [profileImage, setProfileImage] = useState('https://picsum.photos/200');
-  const [birthday, setBirthday] = useState('');
+  const { user, logout } = useAuth();
+  const [profileImage, setProfileImage] = useState(user?.profileImage || 'https://picsum.photos/200');
+  const [username, setUsername] = useState(user?.username || '');
+  const [phoneNumber, setPhoneNumber] = useState(user?.phoneNumber || '');
+  const [bio, setBio] = useState(user?.bio || '');
+  const [birthday, setBirthday] = useState(user?.dob ? new Date(user.dob).toLocaleDateString() : '');
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const scrollY = useRef(new Animated.Value(0)).current;
 
@@ -42,6 +48,22 @@ const EditProfileScreen = () => {
 
     if (!result.cancelled) {
       setProfileImage(result.uri);
+    }
+  };
+
+  const handleSaveProfile = async () => {
+    try {
+      const response = await axios.put('http://192.168.8.130:5000/api/user/update-profile', {
+        userId: user._id,
+        username,
+        phoneNumber,
+        bio,
+        dob: birthday ? new Date(birthday) : null,
+      });
+      console.log('Profile updated:', response.data);
+      navigation.goBack();
+    } catch (error) {
+      console.error('Failed to save profile', error);
     }
   };
 
@@ -71,7 +93,7 @@ const EditProfileScreen = () => {
           <Text style={[styles.headerButtonText, { color: colors.primary }]}>Cancel</Text>
         </TouchableOpacity>
         <Text style={styles.headerText}>Edit Profile</Text>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity onPress={handleSaveProfile}>
           <Text style={[styles.headerButtonText, { color: colors.primary }]}>Done</Text>
         </TouchableOpacity>
       </Animated.View>
@@ -97,13 +119,23 @@ const EditProfileScreen = () => {
         </View>
         <Text style={styles.grayText}>Specify your name and, if you want, add a photo to your profile.</Text>
         <View style={styles.card}>
-          <TextInput style={styles.input} placeholder="First Name" placeholderTextColor="#888" />
-          <View style={styles.divider} />
-          <TextInput style={styles.input} placeholder="Last Name" placeholderTextColor="#888" />
+          <TextInput
+            style={styles.input}
+            placeholder="Username"
+            placeholderTextColor="#888"
+            value={username}
+            onChangeText={setUsername}
+          />
         </View>
         <Text style={styles.grayText}>You can add a few lines about yourself. In settings, you can choose who will see it.</Text>
         <View style={styles.card}>
-          <TextInput style={styles.input} placeholder="Bio" placeholderTextColor="#888" />
+          <TextInput
+            style={styles.input}
+            placeholder="Bio"
+            placeholderTextColor="#888"
+            value={bio}
+            onChangeText={setBio}
+          />
         </View>
         <Text style={styles.grayText}>Your birthday can only be seen by your contacts.</Text>
         <View style={styles.card}>
@@ -121,26 +153,13 @@ const EditProfileScreen = () => {
         <View style={styles.card}>
           <TouchableOpacity style={styles.input}>
             <Text style={styles.inputText}>Change Number</Text>
-            <Text style={styles.inputValue}>+375 25 753 9362</Text>
-          </TouchableOpacity>
-          <View style={styles.divider} />
-          <TouchableOpacity style={styles.input}>
-            <Text style={styles.inputText}>Username</Text>
-            <Text style={styles.inputValue}>@rossenburgg</Text>
-          </TouchableOpacity>
-          <View style={styles.divider} />
-          <TouchableOpacity style={styles.input}>
-            <Text style={styles.inputText}>Personal Colors</Text>
-            <Text style={styles.inputValue}>Set</Text>
+            <Text style={styles.inputValue}>{phoneNumber}</Text>
           </TouchableOpacity>
         </View>
-        <TouchableOpacity style={styles.actionButton}>
-          <Text style={[styles.addAccountText, { color: colors.primary }]}>Add Account</Text>
-        </TouchableOpacity>
-        <Text style={styles.grayText}>You can connect multiple accounts with different phone numbers.</Text>
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={logout}>
           <Text style={styles.logoutText}>Logout</Text>
         </TouchableOpacity>
+        <Text style={styles.grayText}>You can connect multiple accounts with different phone numbers.</Text>
       </Animated.ScrollView>
     </SafeAreaView>
   );
