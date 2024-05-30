@@ -13,14 +13,9 @@ const AuthScreen = () => {
           style={styles.button}
           onPress={() => navigation.navigate('LoginScreen')}
         >
-          <Text style={styles.buttonText}>Login</Text>
+          <Text style={styles.buttonText}>Continue</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.button}
-          onPress={() => navigation.navigate('SignupScreen')}
-        >
-          <Text style={styles.buttonText}>Sign Up</Text>
-        </TouchableOpacity>
+       
       </View>
     </SafeAreaView>
   );

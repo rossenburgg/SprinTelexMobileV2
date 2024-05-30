@@ -4,13 +4,18 @@ import { View, ActivityIndicator } from 'react-native';
 import useAuth from '../hooks/useAuth';
 import { useRouter } from 'expo-router';
 
+
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useAuth();
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace('/AuthScreen');
+    if (!loading) {
+      if (!user) {
+        router.replace('/AuthScreen');
+      } else {
+        router.replace('(tabs)');
+      }
     }
   }, [loading, user, router]);
 

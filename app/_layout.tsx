@@ -30,17 +30,15 @@ export default function RootLayout() {
   }
 
   return (
-<TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme}>
+    <TamaguiProvider config={tamaguiConfig} defaultTheme={colorScheme}>
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <AuthProvider>
           <MenuProvider>
             <Stack>
               <Stack.Screen name="AuthScreen" options={{ headerShown: false }} />
               <Stack.Screen name="LoginScreen" options={{ headerShown: false }} />
-              <Stack.Screen name="SignupScreen" options={{ headerShown: false }} />
+              <Stack.Screen name="OTPVerificationScreen" options={{ headerShown: false }} />
               <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-              <Stack.Screen name="chat/[id]" options={{ headerShown: false }} />
-              <Stack.Screen name="StatusView" options={{ headerShown: false }} />
               <Stack.Screen name="EditProfile" options={{ headerShown: false }} />
             </Stack>
           </MenuProvider>
